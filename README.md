@@ -139,6 +139,3 @@ If you're experiencing connection issues with your Open WebUI instance, try thes
 
 The bot includes built-in rate limiting to prevent overloading your Open WebUI instance. By default, it's set to 10 requests per minute, but you can adjust this in the `.env` file.
 
-## License
-
-MIT 
