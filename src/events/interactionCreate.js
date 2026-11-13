@@ -3,9 +3,26 @@ const { Events, Collection } = require('discord.js');
 module.exports = {
   name: Events.InteractionCreate,
   async execute(interaction) {
+    const command = interaction.client.commands.get(interaction.commandName);
+
+    if (interaction.isAutocomplete()) {
+      try {
+        if (command?.autocomplete) {
+          await command.autocomplete(interaction);
+        } else {
+          await interaction.respond([]);
+        }
+      } catch (error) {
+        console.error('Error handling autocomplete:', error);
+        if (!interaction.responded) {
+          await interaction.respond([]);
+        }
+      }
+      return;
+    }
+
     if (!interaction.isChatInputCommand()) return;
 
-    const command = interaction.client.commands.get(interaction.commandName);
 
     if (!command) {
       console.error(`No command matching ${interaction.commandName} was found.`);

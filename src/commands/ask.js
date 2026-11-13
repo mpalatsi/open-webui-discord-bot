@@ -13,7 +13,41 @@ module.exports = {
     .addStringOption(option =>
       option.setName('model')
         .setDescription('The specific model ID to use (optional)')
+        .setAutocomplete(true)
         .setRequired(false)),
+    async autocomplete(interaction) {
+    const focused = interaction.options.getFocused(true);
+
+    if (focused.name !== 'model') return;
+
+    try {
+        const models = await openWebUI.getModels();
+        const query = String(focused.value).toLowerCase();
+
+        const choices = models
+            .filter(model => {
+                const id = model.id || '';
+                const name = model.name || id;
+                return `${name} ${id}`.toLowerCase().includes(query);
+            })
+            .slice(0, 25)
+            .map(model => {
+                const id = model.id;
+                const name = model.name && model.name !== id
+                    ? `${model.name} (${id})`
+                    : id;
+
+                return { name: name.slice(0, 100), value: id };
+            })
+            .filter(choice => choice.value);
+
+        await interaction.respond(choices);
+    } catch (error) {
+        console.error('Error fetching model suggestions:', error);
+        await interaction.respond([]);
+    }
+},
+
   async execute(interaction) {
     const question = interaction.options.getString('question');
     const modelId = interaction.options.getString('model') || process.env.OPEN_WEBUI_DEFAULT_MODEL || 'gpt-4o';
